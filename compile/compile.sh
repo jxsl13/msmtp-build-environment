@@ -85,6 +85,22 @@ static_libs() {
     find $TARGET_PATH -type f -exec basename {} \; | grep -oP 'lib\K(.*)(?=\.a)' | sort | sed -e 's~^~-l~' | tr -s "\n" " "
 }
 
+rm_shared_libs() {
+    DIR=$1
+    SO_REGEX='.*\.so[\d\.]*$'
+
+    echo "Removing shared libraries from $DIR"
+    find "$DIR" -type l | grep -P "$SO_REGEX" | while read -r file ; do
+        echo "Removing symlink $file"
+        rm -f "$file" && RC=0 || RC=1
+    done
+
+    find "$DIR" -type f | grep -P "$SO_REGEX" | while read -r file ; do
+        echo "Removing shared library $file"
+        rm -f "$file" && RC=0 || RC=1
+    done
+}
+
 # Expecting a single agument that is the file path w/o the .sh extension
 init() {
     SRC_DIR=$(realpath "$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )/../src")

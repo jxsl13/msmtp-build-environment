@@ -17,6 +17,7 @@ files_before_build
 make -j $CORES && \
 make check && \
 make install && \
+rm_shared_libs "$PREFIX/lib/" && \
 RC=0 || RC=1
 stop
 
