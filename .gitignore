@@ -1,0 +1,8 @@
+logs
+logs/*
+src
+src/*
+tmp
+tmp/*
+packages
+packages/*
