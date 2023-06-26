@@ -72,17 +72,27 @@ glibc_force_version() {
 }
 
 # return a list of -l(libname w/o lib prefix and w/o .a suffix) flags as single line from TARGET_PATH
-static_libs64() {
+all_libs64() {
     TARGET_PATH=$1
     # find files and get their base name, fetch only files containing lib(.*64).a, add -l prefix, collapse lines into a single line
-    find $TARGET_PATH -type f -exec basename {} \; | grep -oP 'lib\K(.*64)(?=\.a)' | sort | sed -e 's~^~-l~' | tr -s "\n" " "
+    find $TARGET_PATH -type f -exec basename {} \; | grep -oP 'lib\K(.*64)(?=\.a|\.so[\.\d]*)' | sort | uniq | sed -e 's~^~-l~' | tr -s "\n" " "
 }
 
 # return a list of -l(libname w/o lib prefix and w/o .a suffix) flags as single line from TARGET_PATH
-static_libs() {
+all_libs() {
     TARGET_PATH=$1
     # find files and get their base name, fetch only files containing lib(.*64).a, add -l prefix, collapse lines into a single line
-    find $TARGET_PATH -type f -exec basename {} \; | grep -oP 'lib\K(.*)(?=\.a)' | sort | sed -e 's~^~-l~' | tr -s "\n" " "
+    find $TARGET_PATH -type f -exec basename {} \; | grep -oP 'lib\K(.*)(?=\.a|\.so[\.\d]*)' | sort | uniq | sed -e 's~^~-l~' | tr -s "\n" " "
+}
+
+force_static_libs() {
+    TARGET_PATH=$1
+    find $TARGET_PATH -type f -exec basename {} \; | grep -oP 'lib(.*\.a)$' | sort | sed -e 's~^~-l:~' | tr -s "\n" " "
+}
+
+force_static_libs64() {
+    TARGET_PATH=$1
+    find $TARGET_PATH -type f -exec basename {} \; | grep -oP 'lib(.*64\.a)$' | sort | sed -e 's~^~-l:~' | tr -s "\n" " "
 }
 
 rm_shared_libs() {
@@ -121,8 +131,10 @@ init() {
     export TARGET="$(echo $1 | rev | cut -d'/' -f-2 | rev)"
     export SRC_DIR="$SRC_DIR/$TARGET"
 
-    LIBS="$(static_libs $PREFIX/lib)"
-    LIBS64="$(static_libs64 $PREFIX/lib)"
+    export ALL_LIBS="$(all_libs $PREFIX/lib)"
+    export ALL_LIBS64="$(all_libs64 $PREFIX/lib)"
+    export ALL_STATIC_LIBS="$(force_static_libs $PREFIX/lib)"
+    export ALL_STATIC_LIBS64="$(force_static_libs64 $PREFIX/lib)"
 
     export COMPILE_INIT_ARG="$1"
     export COMPILE_NAME=$(basename $COMPILE_INIT_ARG)
@@ -137,7 +149,7 @@ init() {
     export PKG_CONFIG_PATH="$PREFIX/lib64/pkgconfig:$PREFIX/lib/pkgconfig"
     export PATH="$PREFIX/bin:$PATH"
     export BUILD_TYPE="$(basename $(dirname "$SRC_DIR"))"
-    export LDFLAGS=" -Bstatic -L$PREFIX/lib64 -L$PREFIX/lib -Wl,-rpath,$PREFIX/lib64,-rpath,$PREFIX/lib $LIBS $LIBS64"
+    export LDFLAGS=" -Bstatic -L$PREFIX/lib64 -L$PREFIX/lib -Wl,-rpath,$PREFIX/lib64,-rpath,$PREFIX/lib"
     export CFLAGS=" -m64 -fPIC -I$PREFIX/include "
     export CPPFLAGS=" -I$PREFIX/include "
     export CC="gcc"
