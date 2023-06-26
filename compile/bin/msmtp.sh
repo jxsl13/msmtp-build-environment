@@ -21,12 +21,13 @@ files_before_build
 #   clock_gettime                                     -> -lrt
 #   dlfcn_load dlopen dlerror dlclose dlfcn_unload    -> -ldl
 #
-# -lgsasl -lgss -lidn -lntlm -ldl -lrt -lresol
+# -lgsasl -lgss -lidn -lntlm -ldl -lrt -lresolv
+# -l:libgsasl.a -l:libgss.a -l:libidn.a -l:libntlm.a -ldl -lrt -lresolv
 # direct dependencies to the left, indirect dependencies to the right
-
+# -l:libXXX.a forces to use the libXXX.a file for linking
 autoreconf -i -I "$PREFIX/include" && \
 ./configure --prefix=$PREFIX --without-msmtpd --disable-nls --with-tls=openssl --with-libidn --with-libgsasl --with-libsecret=no &&
-make V=1 -j $CORES LIBS="-l:gsasl -lgss -lidn -lntlm -ldl -lrt -lresolv" &&
+make V=1 -j $CORES LIBS="-l:libgsasl.a -l:libgss.a -l:libidn.a -l:libntlm.a -ldl -lrt -lresolv" &&
 make install &&
 RC=0 || RC=1
 stop
