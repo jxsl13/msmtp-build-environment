@@ -13,8 +13,6 @@ cd_src_dir
 files_before_build
 # gettext 0.21, 0.22 will fail at test-fnmatch, so we use 0.20
 # MUST keep --enable-shared otherwise the build process will fail (we don't want to fix the build process)
-# TODO: fix gettext build to not compile shared libraries (removing them afterwards will not work as intended)
-# rm_shared_libs "$PREFIX/lib/" && \
 ./configure --prefix=$PREFIX --enable-shared --enable-static --disable-libasprintf && \
 make -j $CORES && \
 make check && \
