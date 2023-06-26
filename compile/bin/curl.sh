@@ -13,14 +13,13 @@ COMPILE="$(realpath "$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null
 init "$SCRIPT_PATH"
 
 export LDFLAGS="$LDFLAGS "
-# -lgsasl
 mk_build_dir
 cd_src_dir
 files_before_build
 
 # add this before `make install` to enable tests
 ./configure --prefix=$PREFIX --libdir=$PREFIX/lib --disable-shared --enable-static --with-openssl --with-libgsasl && \
-make -j $CORES && \
+make -j $CORES LIBS="-l:libgsasl.a -l:libz.a" && \
 make install && \
 RC=0 || RC=1
 stop
