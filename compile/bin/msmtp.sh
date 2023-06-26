@@ -26,10 +26,10 @@ files_before_build
 
 autoreconf -i -I "$PREFIX/include" && \
 ./configure --prefix=$PREFIX --without-msmtpd --disable-nls --with-tls=openssl --with-libidn --with-libgsasl --with-libsecret=no &&
-make V=1 -j $CORES LIBS="-lgsasl -lgss -lidn -lntlm -ldl -lrt -lresolv" &&
+make V=1 -j $CORES LIBS="-l:gsasl -lgss -lidn -lntlm -ldl -lrt -lresolv" &&
 make install &&
 RC=0 || RC=1
+stop
 
 diff_and_package_files
-
 exit $RC
